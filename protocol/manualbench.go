@@ -18,7 +18,7 @@ func ManualBench(counter int) {
 	fmt.Printf("Running TimeLockPuzzleManualBenchmark with squaring %v\n times, Takes [%.3f] Seconds \n",
 		counter, duration.Seconds())
 	runtime.GC()
-	ComputeLargeExpManualBenchmark(&setup, 65537) // 65537 = 2^16 +1, the smallest secure public key size for RSA signature
+	ComputeLargeExpManualBenchmark(&setup, 17) // 65537 = 2^16 +1, the smallest secure public key size for RSA signature
 }
 
 // TimeLockPuzzleManualBenchmark is used for manual benchmark because its running time can be long and varies.
