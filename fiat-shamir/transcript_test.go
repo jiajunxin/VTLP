@@ -23,9 +23,9 @@ func TestTranscript(t *testing.T) {
 	trans3.AppendSlice(testStrings[:2])
 	trans3.Append(testStrings[2])
 
-	challenge1 := trans1.GetChallengeUsingTranscript()
-	challenge2 := trans2.GetChallengeUsingTranscript()
-	challenge3 := trans3.GetChallengeUsingTranscript()
+	challenge1 := trans1.GetPrimeChallengeUsingTranscript()
+	challenge2 := trans2.GetPrimeChallengeUsingTranscript()
+	challenge3 := trans3.GetPrimeChallengeUsingTranscript()
 
 	if challenge1.Cmp(challenge2) != 0 {
 		t.Errorf("Different ways to init transcript leads to different results")
@@ -44,8 +44,8 @@ func TestChallenge(t *testing.T) {
 	testStrings := []string{"111", "aaa", "333"}
 	trans1 := InitTranscript(testStrings, Default)
 
-	challenge1 := trans1.GetChallengeUsingTranscript()
-	challenge2 := trans1.GetChallengeUsingTranscript()
+	challenge1 := trans1.GetPrimeChallengeUsingTranscript()
+	challenge2 := trans1.GetPrimeChallengeUsingTranscript()
 	if challenge1.Cmp(challenge2) == 0 {
 		t.Errorf("Updated transcript has old results")
 		trans1.Print()
@@ -53,7 +53,7 @@ func TestChallenge(t *testing.T) {
 
 	trans2 := InitTranscript(testStrings, Default)
 	trans2.Append(challenge1.String())
-	challenge3 := trans2.GetChallengeUsingTranscript()
+	challenge3 := trans2.GetPrimeChallengeUsingTranscript()
 	if challenge3.Cmp(challenge2) != 0 {
 		t.Errorf("Different ways to update transcript leads to different results")
 		trans1.Print()
@@ -65,8 +65,8 @@ func TestPrimeChallengeLength(t *testing.T) {
 	testStrings := []string{"111", "aaa", "333"}
 	trans1 := InitTranscript(testStrings, Max252)
 
-	challenge1 := trans1.GetChallengeUsingTranscript()
-	challenge2 := trans1.GetChallengeUsingTranscript()
+	challenge1 := trans1.GetPrimeChallengeUsingTranscript()
+	challenge2 := trans1.GetPrimeChallengeUsingTranscript()
 	if !challenge1.ProbablyPrime(securityParameter) {
 		t.Errorf("Challenge not prime")
 	}
@@ -95,12 +95,12 @@ func FuzzChallenge(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, testInput string) {
 		trans1 := InitTranscript([]string{testInput}, Default)
-		challenge1 := trans1.GetChallengeUsingTranscript()
+		challenge1 := trans1.GetPrimeChallengeUsingTranscript()
 		if !challenge1.ProbablyPrime(securityParameter) {
 			t.Errorf("Challenge not prime")
 		}
 		trans1 = InitTranscript([]string{testInput}, Max252)
-		challenge1 = trans1.GetChallengeUsingTranscript()
+		challenge1 = trans1.GetPrimeChallengeUsingTranscript()
 		if !challenge1.ProbablyPrime(securityParameter) {
 			t.Errorf("Challenge not prime")
 		}
