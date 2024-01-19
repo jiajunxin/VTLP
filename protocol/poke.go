@@ -48,6 +48,9 @@ func PoKEStarProve(pp *PublicParameters, C, x *big.Int) (*PoKEStarProof, error) 
 
 // PoKEStarVerify checks the proof, returns true if everything is good
 func PoKEStarVerify(pp *PublicParameters, C *big.Int, proof *PoKEStarProof) bool {
+	if proof == nil {
+		return false
+	}
 	var temp, l big.Int
 	transcript := fiatshamir.InitTranscript([]string{"PoKEStar", pp.G.String(), pp.N.String(), C.String()}, fiatshamir.Max252)
 	l.Set(transcript.GetPrimeChallengeUsingTranscript())
@@ -124,6 +127,9 @@ func ZKPoKEProve(pp *PublicParameters, u, x, w *big.Int) (*ZKPoKEProof, error) {
 
 // ZKPoKEVerify checks the proof, returns true if everything is good
 func ZKPoKEVerify(pp *PublicParameters, u, w *big.Int, proof *ZKPoKEProof) bool {
+	if proof == nil {
+		return false
+	}
 	var c, l big.Int
 	transcript := fiatshamir.InitTranscript([]string{"ZKPoKE", pp.G.String(), pp.H.String(),
 		pp.N.String(), u.String(), w.String(), proof.z.String(), proof.Ag.String(), proof.Au.String()}, fiatshamir.Max252)
@@ -142,7 +148,6 @@ func ZKPoKEVerify(pp *PublicParameters, u, w *big.Int, proof *ZKPoKEProof) bool 
 	if lhs.Cmp(&rhs) != 0 {
 		return false
 	}
-
 	lhs.Set(MultiExp(proof.Qu, &l, u, proof.rx, pp.N))
 	rhs.Exp(w, &c, pp.N)
 	rhs.Mul(&rhs, proof.Au)
@@ -151,5 +156,42 @@ func ZKPoKEVerify(pp *PublicParameters, u, w *big.Int, proof *ZKPoKEProof) bool 
 		return false
 	}
 	return true
+}
 
+// PoEProof contains the proofs for PoKE
+type PoEProof struct {
+	Q *big.Int
+}
+
+// PoEProve proves g^x = C
+func PoEProve(pp *PublicParameters, C, x *big.Int) (*PoEProof, error) {
+	var ret PoEProof
+	ret.Q = new(big.Int)
+	var temp, q, l big.Int
+	temp.Exp(pp.G, x, pp.N)
+	if temp.Cmp(C) != 0 {
+		return nil, errors.New("PoKEStar inputs a invalid statement")
+	}
+
+	transcript := fiatshamir.InitTranscript([]string{"PoE", pp.G.String(), pp.N.String(), C.String(), x.String()}, fiatshamir.Max252)
+	l.Set(transcript.GetPrimeChallengeUsingTranscript())
+	q.Div(x, &l)
+	ret.Q.Exp(pp.G, &q, pp.N)
+	return &ret, nil
+}
+
+// PoEVerify checks the proof, returns true if everything is good
+func PoEVerify(pp *PublicParameters, C, x *big.Int, proof *PoEProof) bool {
+	if proof == nil {
+		return false
+	}
+	var temp, l, r big.Int
+	transcript := fiatshamir.InitTranscript([]string{"PoE", pp.G.String(), pp.N.String(), C.String(), x.String()}, fiatshamir.Max252)
+	l.Set(transcript.GetPrimeChallengeUsingTranscript())
+	r.Mod(x, &l)
+	temp.Set(MultiExp(proof.Q, &l, pp.G, &r, pp.N))
+	if temp.Cmp(C) == 0 {
+		return true
+	}
+	return false
 }

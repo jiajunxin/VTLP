@@ -105,3 +105,25 @@ func TestZKPoKEMod(t *testing.T) {
 		t.Errorf("pass verification when it should not")
 	}
 }
+
+func TestPoE(t *testing.T) {
+	setup := TrustedSetup()
+	pp := PublicParameters{setup.N, setup.G, setup.H}
+	var exponent, C big.Int
+	exponent.SetInt64(666)
+	C.Exp(setup.G, &exponent, setup.N)
+	proof, err := PoEProve(&pp, &C, &exponent)
+	if err != nil {
+		t.Errorf("error not empty for TestPoKEStar")
+	}
+	flag := PoEVerify(&pp, &C, &exponent, proof)
+	if flag != true {
+		t.Errorf("did not pass verification")
+	}
+
+	exponent.SetInt64(123777)
+	flag = PoEVerify(&pp, &C, &exponent, proof)
+	if flag == true {
+		t.Errorf("pass verification when it should not")
+	}
+}
