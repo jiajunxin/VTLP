@@ -38,7 +38,7 @@ func TestPoKEStar(t *testing.T) {
 	}
 }
 
-func TestZKPoKE2(t *testing.T) {
+func TestZKPoKE(t *testing.T) {
 	setup := TrustedSetup()
 	pp := PublicParameters{setup.N, setup.G, setup.H}
 	var exponent, C big.Int
@@ -66,6 +66,41 @@ func TestZKPoKE2(t *testing.T) {
 	exponent.SetInt64(66777)
 	C.Exp(setup.G, &exponent, setup.N)
 	flag = ZKPoKEVerify(&pp, pp.G, &C, proof)
+	if flag == true {
+		t.Errorf("pass verification when it should not")
+	}
+}
+
+func TestZKPoKEMod(t *testing.T) {
+	setup := TrustedSetup()
+	pp := PublicParameters{setup.N, setup.G, setup.H}
+	var x, C, n, xmod big.Int //x mod n = xmod
+	x.SetInt64(666)
+	n.SetInt64(10)
+	xmod.SetInt64(6)
+	C.Exp(setup.G, &x, setup.N)
+	proof, err := ZKPoKEModProve(&pp, &C, &x, &n, &xmod)
+	if err != nil {
+		t.Errorf("error not empty for TestPoKEStar")
+	}
+	flag := ZKPoKEModVerify(&pp, &C, &n, &xmod, proof)
+	if flag != true {
+		t.Errorf("did not pass verification")
+	}
+
+	x.SetInt64(667)
+	proof, err = ZKPoKEModProve(&pp, &C, &x, &n, &xmod)
+	if err == nil {
+		t.Errorf("error empty when it should not for TestPoKEStar")
+	}
+	C.Exp(setup.G, &x, setup.N)
+	proof, err = ZKPoKEModProve(&pp, &C, &x, &n, &xmod)
+	if err == nil {
+		t.Errorf("error empty when it should not for TestPoKEStar")
+	}
+	x.SetInt64(66777)
+	C.Exp(setup.G, &x, setup.N)
+	flag = ZKPoKEModVerify(&pp, &C, &n, &xmod, proof)
 	if flag == true {
 		t.Errorf("pass verification when it should not")
 	}
