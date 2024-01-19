@@ -158,7 +158,7 @@ func ZKPoKEVerify(pp *PublicParameters, u, w *big.Int, proof *ZKPoKEProof) bool 
 	return true
 }
 
-// PoEProof contains the proofs for PoKE
+// PoEProof contains the proofs for PoE
 type PoEProof struct {
 	Q *big.Int
 }
