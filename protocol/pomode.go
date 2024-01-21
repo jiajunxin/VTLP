@@ -74,3 +74,38 @@ func ZKPoMoDEVerify(pp *PublicParameters, C, n, e, xmod *big.Int, proof *ZKPoMoD
 	}
 	return true
 }
+
+// ZKPoMoDE contains the proofs for PoMoDE: proof of modular double exponent
+type ZKPoMoDEFastProof struct {
+	pi1 *ZKPoKDEProof
+	pi2 *ZKPoKEModProof
+}
+
+func ZKPoMoDEFastProve(pp *PublicParameters, C1, C2, n, e, xmod, x *big.Int) (*ZKPoMoDEFastProof, error) {
+	var ret ZKPoMoDEFastProof
+	tempProof1, err := ZKPoKDEProve(pp, C1, C2, x, e)
+	if err != nil {
+		return nil, err
+	}
+	ret.pi1 = tempProof1
+
+	tempProof2, err := ZKPoKEModProve(pp, C2, new(big.Int).Exp(x, e, nil), n, xmod)
+	if err != nil {
+		return nil, err
+	}
+	ret.pi2 = tempProof2
+	return &ret, nil
+}
+
+func ZKPoMoDEFastVerify(pp *PublicParameters, C1, C2, n, e, xmod *big.Int, proof *ZKPoMoDEFastProof) bool {
+	if proof == nil || proof.pi1 == nil || proof.pi2 == nil {
+		return false
+	}
+	if ZKPoKDEVerify(pp, C1, C2, e, proof.pi1) == false {
+		return false
+	}
+	if ZKPoKEModVerify(pp, C2, n, xmod, proof.pi2) == false {
+		return false
+	}
+	return true
+}
