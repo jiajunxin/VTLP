@@ -10,7 +10,7 @@ type ZKPoMoDEProof struct {
 	D   *big.Int
 	C2  *big.Int
 	pi1 *PoKEStarProof
-	pi2 *PoKDEProof
+	pi2 *ZKPoKDEProof
 	pi3 *ZKPoKEModProof
 }
 
@@ -39,7 +39,7 @@ func ZKPoMoDEProve(pp *PublicParameters, C, n, e, xmod, x *big.Int) (*ZKPoMoDEPr
 	temp.Mul(&temp, C)
 	temp.Mod(&temp, pp.N)
 	ret.C2 = new(big.Int).Exp(pp.G, &sum2e, pp.N)
-	tempProof1, err := PoKDEProve(pp, &temp, ret.C2, &sum, e)
+	tempProof1, err := ZKPoKDEProve(pp, &temp, ret.C2, &sum, e)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func ZKPoMoDEVerify(pp *PublicParameters, C, n, e, xmod *big.Int, proof *ZKPoMoD
 	temp.Exp(proof.D, n, pp.N)
 	temp.Mul(&temp, C)
 	temp.Mod(&temp, pp.N)
-	if PoKDEVerify(pp, &temp, proof.C2, e, proof.pi2) == false {
+	if ZKPoKDEVerify(pp, &temp, proof.C2, e, proof.pi2) == false {
 		return false
 	}
 
