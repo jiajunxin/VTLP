@@ -51,18 +51,18 @@ type ExpCircuitPublicInputs struct {
 func GenTestSet(exponent *big.Int, setup *protocol.Setup) *ExpCircuitInputs {
 	var ret ExpCircuitInputs
 	rsaExp := protocol.RSAExpSetup()
-	ret.Squares = protocol.GetSquares(&rsaExp.Base, &rsaExp.RSAMod)
+	ret.Squares = protocol.GetSquares(rsaExp.Base, rsaExp.RSAMod)
 	if exponent == nil {
-		ret.Exponent = rsaExp.Exponent
+		ret.Exponent = *rsaExp.Exponent
 	}
 
 	// Compute an
-	prod := protocol.GetProd(&rsaExp.Base, &rsaExp.Exponent, &rsaExp.RSAMod)
+	prod := protocol.GetProd(rsaExp.Base, rsaExp.Exponent, rsaExp.RSAMod)
 	var acc, remainder big.Int
 	acc.Exp(setup.G, prod, setup.N)
 	// We should generate a commitment of x here and input into as part of the transcript. However, this version of gnark does not support CP-SNARK.
 	transcript := fiatshamir.InitTranscript([]string{rsaExp.Base.String(), rsaExp.RSAMod.String(), setup.G.String(), setup.N.String(), acc.String()}, fiatshamir.Max252)
-	ret.ChallengeL.Set(transcript.GetChallengeUsingTranscript())
+	ret.ChallengeL.Set(transcript.GetPrimeChallengeUsingTranscript())
 	remainder.Mod(prod, &ret.ChallengeL)
 	ret.RemainderR.Set(&remainder)
 	return &ret
