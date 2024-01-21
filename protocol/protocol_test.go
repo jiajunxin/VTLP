@@ -183,14 +183,14 @@ func TestZKPoKDE(t *testing.T) {
 func TestZKPoMoDE(t *testing.T) {
 	setup := TrustedSetup()
 	pp := PublicParameters{setup.N, setup.G, setup.H}
-	var x, C1, C2, e, xe, n, xmod big.Int //xe = x^e
+	var x, C1, C2, e, x2e, n, xmod big.Int //x2e = x^e
 	x.SetInt64(6)
 	e.SetInt64(7)
 	n.SetInt64(10)
-	xe.Exp(&x, &e, nil) //6^7 = 279936
-	xmod.SetInt64(6)
+	x2e.Exp(&x, &e, nil) //6^7 = 279936
+	xmod.Mod(&x2e, &n)
 	C1.Exp(setup.G, &x, setup.N)
-	C2.Exp(setup.G, &xe, setup.N)
+	C2.Exp(setup.G, &x2e, setup.N)
 	proof, err := ZKPoMoDEProve(&pp, &C1, &n, &e, &xmod, &x)
 	if err != nil {
 		t.Errorf("error not empty for TestPoKEStar")
@@ -211,14 +211,14 @@ func TestZKPoMoDE(t *testing.T) {
 func TestZKPoMoDEFast(t *testing.T) {
 	setup := TrustedSetup()
 	pp := PublicParameters{setup.N, setup.G, setup.H}
-	var x, C1, C2, e, xe, n, xmod big.Int //xe = x^e
+	var x, C1, C2, e, x2e, n, xmod big.Int //xe = x^e
 	x.SetInt64(6)
 	e.SetInt64(7)
 	n.SetInt64(10)
-	xe.Exp(&x, &e, nil) //6^7 = 279936
+	x2e.Exp(&x, &e, nil) //6^7 = 279936
 	xmod.SetInt64(6)
 	C1.Exp(setup.G, &x, setup.N)
-	C2.Exp(setup.G, &xe, setup.N)
+	C2.Exp(setup.G, &x2e, setup.N)
 	proof, err := ZKPoMoDEFastProve(&pp, &C1, &C2, &n, &e, &xmod, &x)
 	if err != nil {
 		t.Errorf("error not empty for TestPoKEStar")
