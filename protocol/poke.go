@@ -164,32 +164,32 @@ type PoEProof struct {
 }
 
 // PoEProve proves g^x = C
-func PoEProve(pp *PublicParameters, C, x *big.Int) (*PoEProof, error) {
+func PoEProve(base, mod, C, x *big.Int) (*PoEProof, error) {
 	var ret PoEProof
 	ret.Q = new(big.Int)
 	var temp, q, l big.Int
-	temp.Exp(pp.G, x, pp.N)
+	temp.Exp(base, x, mod)
 	if temp.Cmp(C) != 0 {
 		return nil, errors.New("PoKEStar inputs a invalid statement")
 	}
 
-	transcript := fiatshamir.InitTranscript([]string{"PoE", pp.G.String(), pp.N.String(), C.String(), x.String()}, fiatshamir.Max252)
+	transcript := fiatshamir.InitTranscript([]string{"PoE", base.String(), mod.String(), C.String(), x.String()}, fiatshamir.Max252)
 	l.Set(transcript.GetPrimeChallengeUsingTranscript())
 	q.Div(x, &l)
-	ret.Q.Exp(pp.G, &q, pp.N)
+	ret.Q.Exp(base, &q, mod)
 	return &ret, nil
 }
 
 // PoEVerify checks the proof, returns true if everything is good
-func PoEVerify(pp *PublicParameters, C, x *big.Int, proof *PoEProof) bool {
+func PoEVerify(base, mod, C, x *big.Int, proof *PoEProof) bool {
 	if proof == nil {
 		return false
 	}
 	var temp, l, r big.Int
-	transcript := fiatshamir.InitTranscript([]string{"PoE", pp.G.String(), pp.N.String(), C.String(), x.String()}, fiatshamir.Max252)
+	transcript := fiatshamir.InitTranscript([]string{"PoE", base.String(), mod.String(), C.String(), x.String()}, fiatshamir.Max252)
 	l.Set(transcript.GetPrimeChallengeUsingTranscript())
 	r.Mod(x, &l)
-	temp.Set(MultiExp(proof.Q, &l, pp.G, &r, pp.N))
+	temp.Set(MultiExp(proof.Q, &l, base, &r, mod))
 	if temp.Cmp(C) == 0 {
 		return true
 	}

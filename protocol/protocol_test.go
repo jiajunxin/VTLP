@@ -112,17 +112,17 @@ func TestPoE(t *testing.T) {
 	var exponent, C big.Int
 	exponent.SetInt64(666)
 	C.Exp(setup.G, &exponent, setup.N)
-	proof, err := PoEProve(&pp, &C, &exponent)
+	proof, err := PoEProve(pp.G, pp.N, &C, &exponent)
 	if err != nil {
 		t.Errorf("error not empty for TestPoKEStar")
 	}
-	flag := PoEVerify(&pp, &C, &exponent, proof)
+	flag := PoEVerify(pp.G, pp.N, &C, &exponent, proof)
 	if flag != true {
 		t.Errorf("did not pass verification")
 	}
 
 	exponent.SetInt64(123777)
-	flag = PoEVerify(&pp, &C, &exponent, proof)
+	flag = PoEVerify(pp.G, pp.N, &C, &exponent, proof)
 	if flag == true {
 		t.Errorf("pass verification when it should not")
 	}
@@ -149,6 +149,32 @@ func TestPoKDE(t *testing.T) {
 	x.SetInt64(66777)
 	C2.Exp(setup.G, &x, setup.N)
 	flag = PoKDEVerify(&pp, &C1, &C2, &e, proof)
+	if flag == true {
+		t.Errorf("pass verification when it should not")
+	}
+}
+
+func TestZKPoKDE(t *testing.T) {
+	setup := TrustedSetup()
+	pp := PublicParameters{setup.N, setup.G, setup.H}
+	var x, C1, C2, e, xe big.Int //xe = x^e
+	x.SetInt64(666)
+	e.SetInt64(17)
+	xe.Exp(&x, &e, nil)
+	C1.Exp(setup.G, &x, setup.N)
+	C2.Exp(setup.G, &xe, setup.N)
+	proof, err := ZKPoKDEProve(&pp, &C1, &C2, &x, &e)
+	if err != nil {
+		t.Errorf("error not empty for TestPoKEStar")
+	}
+	flag := ZKPoKDEVerify(&pp, &C1, &C2, &e, proof)
+	if flag != true {
+		t.Errorf("did not pass verification")
+	}
+
+	x.SetInt64(66777)
+	C2.Exp(setup.G, &x, setup.N)
+	flag = ZKPoKDEVerify(&pp, &C1, &C2, &e, proof)
 	if flag == true {
 		t.Errorf("pass verification when it should not")
 	}
