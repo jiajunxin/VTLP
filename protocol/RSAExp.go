@@ -13,7 +13,7 @@ type RSAExpProof struct {
 	Q      big.Int
 	//Order is the order of subgroup QR_N
 	Order    big.Int
-	Exponent big.Int
+	Exponent big.Int // Exponent  = 2^TimePara mod Order
 }
 
 func RSAExpSetup() *RSAExpProof {

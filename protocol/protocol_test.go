@@ -179,3 +179,31 @@ func TestZKPoKDE(t *testing.T) {
 		t.Errorf("pass verification when it should not")
 	}
 }
+
+func TestZKPoMoDE(t *testing.T) {
+	setup := TrustedSetup()
+	pp := PublicParameters{setup.N, setup.G, setup.H}
+	var x, C1, C2, e, xe, n, xmod big.Int //xe = x^e
+	x.SetInt64(6)
+	e.SetInt64(7)
+	n.SetInt64(10)
+	xe.Exp(&x, &e, nil) //6^7 = 279936
+	xmod.SetInt64(6)
+	C1.Exp(setup.G, &x, setup.N)
+	C2.Exp(setup.G, &xe, setup.N)
+	proof, err := ZKPoMoDEProve(&pp, &C1, &n, &e, &xmod, &x)
+	if err != nil {
+		t.Errorf("error not empty for TestPoKEStar")
+	}
+	flag := ZKPoMoDEVerify(&pp, &C1, &n, &e, &xmod, proof)
+	if flag != true {
+		t.Errorf("did not pass verification")
+	}
+
+	x.SetInt64(66777)
+	C1.Exp(setup.G, &x, setup.N)
+	flag = ZKPoMoDEVerify(&pp, &C1, &n, &e, &xmod, proof)
+	if flag == true {
+		t.Errorf("pass verification when it should not")
+	}
+}

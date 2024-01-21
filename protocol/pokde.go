@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"crypto/rand"
-	"fmt"
 	"math/big"
 
 	fiatshamir "github.com/PoMoDE/fiat-shamir"
@@ -130,7 +129,6 @@ func ZKPoKDEProve(pp *PublicParameters, C1, C2, x, e *big.Int) (*ZKPoKDEProof, e
 // ZKPoKDEVerify checks C1=g^x, C2=g^{x^e}, returns true is everything is correct
 func ZKPoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *ZKPoKDEProof) bool {
 	if pp == nil || proof == nil || proof.pi1 == nil || proof.pi2 == nil || proof.pi3 == nil || proof.pi4 == nil {
-		fmt.Println("error 1")
 		return false
 	}
 
@@ -146,13 +144,11 @@ func ZKPoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *ZKPoKDEProof
 	temp.Mul(proof.F, proof.K)
 	temp.Mod(&temp, pp.N)
 	if temp.Cmp(proof.E) != 0 {
-		fmt.Println("error 2")
 		return false
 	}
 
 	temp.Exp(&l, e, nil)
 	if PoEVerify(C2, pp.N, proof.K, &temp, proof.pi2) != true {
-		fmt.Println("error 3")
 		return false
 	}
 	//temp = D * g^gamma
@@ -160,14 +156,12 @@ func ZKPoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *ZKPoKDEProof
 	temp.Mul(&temp, proof.D)
 	temp.Mod(&temp, pp.N)
 	if ZKPoKEVerify(pp, &temp, proof.F, proof.pi3) != true {
-		fmt.Println("error 4")
 		return false
 	}
 	//temp = C1^l * D * g^gamma
 	temp.Mul(&temp, new(big.Int).Exp(C1, &l, pp.N))
 	temp.Mod(&temp, pp.N)
 	if PoKDEVerify(pp, &temp, proof.E, e, proof.pi4) != true {
-		fmt.Println("error 5")
 		return false
 	}
 
