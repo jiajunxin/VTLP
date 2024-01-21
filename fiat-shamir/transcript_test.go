@@ -61,6 +61,29 @@ func TestChallenge(t *testing.T) {
 	}
 }
 
+func TestLargeChallenge(t *testing.T) {
+	testStrings := []string{"111", "aaa", "333"}
+	trans1 := InitTranscript(testStrings, Default)
+
+	lenght := 2048
+	challenge1 := trans1.GetLargeChallengeUsingTranscript(lenght)
+	if challenge1.BitLen() != lenght && challenge1.BitLen() != lenght-1 {
+		t.Error("Wrong bit length for large challenge, length = ", challenge1.BitLen())
+	}
+	lenght = 2048 + 233
+	challenge1 = trans1.GetLargeChallengeUsingTranscript(lenght)
+	if challenge1.BitLen() != lenght && challenge1.BitLen() != lenght-1 {
+		t.Error("Wrong bit length for large challenge, length = ", challenge1.BitLen())
+	}
+	lenght = 2048 * 256
+	challenge1 = trans1.GetLargeChallengeUsingTranscript(lenght)
+	// we may loose several bits because the leading bits are 0
+	if challenge1.BitLen() != lenght && challenge1.BitLen() != lenght-1 && challenge1.BitLen() != lenght-2 {
+		//fmt.Println("Challenge = ", challenge1.String())
+		t.Error("Wrong bit length for large challenge, length = ", challenge1.BitLen())
+	}
+}
+
 func TestPrimeChallengeLength(t *testing.T) {
 	testStrings := []string{"111", "aaa", "333"}
 	trans1 := InitTranscript(testStrings, Max252)
