@@ -127,3 +127,29 @@ func TestPoE(t *testing.T) {
 		t.Errorf("pass verification when it should not")
 	}
 }
+
+func TestPoKDE(t *testing.T) {
+	setup := TrustedSetup()
+	pp := PublicParameters{setup.N, setup.G, setup.H}
+	var x, C1, C2, e, xe big.Int //xe = x^e
+	x.SetInt64(666)
+	e.SetInt64(17)
+	xe.Exp(&x, &e, nil)
+	C1.Exp(setup.G, &x, setup.N)
+	C2.Exp(setup.G, &xe, setup.N)
+	proof, err := PoKDEProve(&pp, &C1, &C2, &x, &e)
+	if err != nil {
+		t.Errorf("error not empty for TestPoKEStar")
+	}
+	flag := PoKDEVerify(&pp, &C1, &C2, &e, proof)
+	if flag != true {
+		t.Errorf("did not pass verification")
+	}
+
+	x.SetInt64(66777)
+	C2.Exp(setup.G, &x, setup.N)
+	flag = PoKDEVerify(&pp, &C1, &C2, &e, proof)
+	if flag == true {
+		t.Errorf("pass verification when it should not")
+	}
+}

@@ -14,13 +14,15 @@ type PoKDEProof struct {
 	r2 *big.Int
 }
 
-func PoKDEProve(pp *PublicParameters, C1, C2, e, x *big.Int) (*PoKDEProof, error) {
-	var l, q1, q2, r1, r2 big.Int
+// PoKDEProve prove C1=g^x, C2=g^{x^e}
+func PoKDEProve(pp *PublicParameters, C1, C2, x, e *big.Int) (*PoKDEProof, error) {
+	var xe, l, q1, q2, r1, r2 big.Int
+	xe.Exp(x, e, nil)
 	transcript := fiatshamir.InitTranscript([]string{"PoKDE", pp.G.String(), pp.N.String(), C1.String(), C1.String(), e.String()}, fiatshamir.Max252)
 	l.Set(transcript.GetPrimeChallengeUsingTranscript())
 	var ret PoKDEProof
 	q1.DivMod(x, &l, &r1)
-	q2.DivMod(x, &l, &r2)
+	q2.DivMod(&xe, &l, &r2)
 	ret.Q1 = new(big.Int).Exp(pp.G, &q1, pp.N)
 	ret.Q2 = new(big.Int).Exp(pp.G, &q2, pp.N)
 	ret.r1 = new(big.Int).Set(&r1)
@@ -29,6 +31,7 @@ func PoKDEProve(pp *PublicParameters, C1, C2, e, x *big.Int) (*PoKDEProof, error
 	return &ret, nil
 }
 
+// PoKDEVerify checks the proof, returns true if everything is good
 func PoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *PoKDEProof) bool {
 	if proof == nil || proof.Q1 == nil || proof.Q2 == nil || proof.r1 == nil || proof.r2 == nil {
 		return false
