@@ -12,5 +12,6 @@ func main() {
 
 	snark.TestRSAOffload()
 	runtime.GC()
+
 	return
 }

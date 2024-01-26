@@ -8,7 +8,7 @@ import (
 	fiatshamir "github.com/PoMoDE/fiat-shamir"
 )
 
-// ZKPoKEModProof contains the proofs for PoKE
+// ZKPoKEModProof contains the proofs for ZKPoKEMod
 type ZKPoKEModProof struct {
 	D  *big.Int
 	pi *PoKEStarProof
