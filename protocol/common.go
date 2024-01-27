@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
-
-	"github.com/remyoudompheng/bigfft"
 )
 
 const (
@@ -62,18 +60,6 @@ func TrustedSetup() *Setup {
 	ret.G.SetString(G2048String, 10)
 	ret.H.SetString(H2048String, 10)
 	return ret
-}
-
-// GenRepresentatives generates different representatives that can be inputted into RSA accumulator
-func GenRepresentatives(set []string, encodeType EncodeType) []*big.Int {
-	switch encodeType {
-	case HashToPrimeFromSha256:
-		return genRepWithHashToPrimeFromSHA256(set)
-	case DIHashFromPoseidon:
-		return genRepWithDIHashFromPoseidon(set)
-	default:
-		return genRepWithHashToPrimeFromSHA256(set)
-	}
 }
 
 var (
@@ -184,78 +170,6 @@ func SetProductRecursive(inputSet []*big.Int) *big.Int {
 	// fmt.Printf("Running multiplication for last two large number Takes [%.3f] Seconds \n",
 	// 	duration.Seconds())
 	return &ret
-}
-
-// SetProductRecursiveFast calculates the products of the input divide-and-conquer recursively
-func SetProductRecursiveFast(inputSet []*big.Int) *big.Int {
-	length := len(inputSet)
-	var ret big.Int
-	if length <= 2 {
-		ret.SetInt64(1)
-		for i := 0; i < length; i++ {
-			ret.Set(bigfft.Mul(&ret, inputSet[i]))
-		}
-		return &ret
-	}
-	var prod1, prod2 big.Int
-	prod1 = *SetProductRecursiveFast(inputSet[0 : length/2])
-	prod2 = *SetProductRecursiveFast(inputSet[length/2:])
-	ret.Set(bigfft.Mul(&prod1, &prod2))
-	return &ret
-}
-
-// SetProductParallel uses divide-and-conquer method to calculate the product of the input
-// It uses at most O(2^limit) Goroutines
-func SetProductParallel(inputSet []*big.Int, limit int) *big.Int {
-	if limit == 0 {
-		return SetProductRecursiveFast(inputSet)
-	}
-	limit--
-	length := len(inputSet)
-	if length <= 2 {
-		return SetProductRecursiveFast(inputSet)
-	}
-
-	c1 := make(chan *big.Int)
-	c2 := make(chan *big.Int)
-	go setProductParallelWithChan(inputSet[0:length/2], limit, c1)
-	go setProductParallelWithChan(inputSet[length/2:], limit, c2)
-	prod1 := <-c1
-	prod2 := <-c2
-
-	var ret big.Int
-	ret.Mul(prod1, prod2)
-	//ret := bigfft.Mul(prod1, prod2)
-	return &ret
-}
-
-// proveMembership uses divide-and-conquer method to pre-compute the all membership proofs in time O(nlog(n))
-func setProductParallelWithChan(inputSet []*big.Int, limit int, c chan *big.Int) {
-	if limit == 0 {
-		c <- SetProductRecursiveFast(inputSet)
-		close(c)
-		return
-	}
-	limit--
-	length := len(inputSet)
-	if len(inputSet) <= 2 {
-		c <- SetProductRecursiveFast(inputSet)
-		close(c)
-		return
-	}
-
-	c1 := make(chan *big.Int)
-	c2 := make(chan *big.Int)
-	go setProductParallelWithChan(inputSet[0:length/2], limit, c1)
-	go setProductParallelWithChan(inputSet[length/2:], limit, c2)
-	prod1 := <-c1
-	prod2 := <-c2
-
-	var ret big.Int
-	ret.Mul(prod1, prod2)
-	//ret := bigfft.Mul(prod1, prod2)
-	c <- &ret
-	close(c)
 }
 
 // GetPseudoRandomElement returns the pseudo random element from the input integer, for test use only

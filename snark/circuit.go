@@ -22,7 +22,7 @@ type VLTPCircuit struct {
 // Define declares the circuit constraints
 func (circuit VLTPCircuit) Define(api frontend.API) error {
 	//check input are in the correct range
-	api.AssertIsLess(circuit.RemainderR, circuit.ChallengeL)
+	api.AssertIsLessOrEqual(circuit.RemainderR, circuit.ChallengeL)
 	api.AssertIsEqual(len(circuit.squares), BitLength)
 	api.AssertIsEqual(len(circuit.x), LimbNum)
 	// ToBinary not only returns the binary, but additionaly checks if the binary representation is same as the input,
@@ -36,7 +36,7 @@ func (circuit VLTPCircuit) Define(api frontend.API) error {
 	}
 
 	// To be modified
-	api.AssertIsLess(remainderTemp, circuit.RemainderR)
+	api.AssertIsLessOrEqual(remainderTemp, circuit.RemainderR)
 	return nil
 }
 

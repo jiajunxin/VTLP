@@ -3,15 +3,13 @@ package protocol
 import (
 	"errors"
 	"math/big"
-
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 )
 
 // GenVRF generates a verifiable random function value using rsasetup. Note that the rsasetup and in GenPuzzle can be different in practice
 func GenVRF(message []byte, rsasetup *RSAExpProof) *big.Int {
-	var element fr.Element
-	element.SetBytes(message)
-	return DIHashPoseidon(&element)
+	var ret big.Int
+	ret.Exp(MiMcToInt(message), rsasetup.D, rsasetup.RSAMod)
+	return &ret
 }
 
 // GenPuzzle generates a time-lock puzzle using the parameters of RSAExpProof, s is the solution

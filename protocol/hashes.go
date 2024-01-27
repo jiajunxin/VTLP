@@ -4,34 +4,8 @@ import (
 	"crypto/sha256"
 	"math/big"
 
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr/poseidon"
+	"github.com/consensys/gnark-crypto/hash"
 )
-
-// ElementFromBigInt returns an element in BN256 generated from BigInt
-func ElementFromBigInt(v *big.Int) *fr.Element {
-	var e fr.Element
-	e.SetBigInt(v)
-	return &e
-}
-
-// ElementFromString returns an element in BN256 generated from string of decimal integers
-func ElementFromString(v string) *fr.Element {
-	n, success := new(big.Int).SetString(v, 10)
-	if !success {
-		panic("Error parsing hex number")
-	}
-	var e fr.Element
-	e.SetBigInt(n)
-	return &e
-}
-
-// ElementFromUint32 returns an element in BN256 generated from uint32
-func ElementFromUint32(v uint32) *fr.Element {
-	var e fr.Element
-	e.SetInt64(int64(v))
-	return &e
-}
 
 // HashToPrime takes the input into Sha256 and take the hash output to input repeatedly until we hit a prime number
 func HashToPrime(input []byte) *big.Int {
@@ -72,44 +46,34 @@ func SHA256ToInt(input []byte) *big.Int {
 	return &ret
 }
 
-// PoseidonWith2Inputs inputs 2 big.Int and generate a Poseidon hash result.
-func PoseidonWith2Inputs(inputs []*big.Int) *big.Int {
+// SHA256ToInt calculates the input with Sha256 and change it to big.Int
+func MiMcToInt(input []byte) *big.Int {
+	hFunc := hash.MIMC_BN254.New()
+	hFunc.Reset()
+
+	if _, err := hFunc.Write(input); err != nil {
+		return nil
+	}
+	var hramInt big.Int
+	hramBin := hFunc.Sum(nil)
+	hramInt.SetBytes(hramBin)
+	return &hramInt
+}
+
+// MiMCWith2Inputs inputs 2 big.Int and generate a MiMC hash result.
+func MiMCWith2Inputs(inputs []*big.Int) *big.Int {
 	if len(inputs) != 2 {
-		panic("PoseidonWith2Inputs requires 2 inputs")
+		panic("MiMCWith2Inputs requires 2 inputs")
 	}
-	fieldElement := poseidon.Poseidon(ElementFromBigInt(inputs[0]), (ElementFromBigInt(inputs[1])))
-	var ret big.Int
-	fieldElement.ToBigIntRegular(&ret)
-	return &ret
-}
-
-// UniversalHashToInt calculates output = input * A + B mod P
-func UniversalHashToInt(input *big.Int) *big.Int {
-	var ret big.Int
-	ret.Mul(input, A)
-	ret.Mod(&ret, P)
-	ret.Add(&ret, B)
-	ret.Mod(&ret, P)
-	if ret.Bit(0) == 0 {
-		ret.Add(&ret, big1)
+	hFunc := hash.MIMC_BN254.New()
+	hFunc.Reset()
+	for _, bytes := range inputs {
+		if _, err := hFunc.Write(bytes.Bytes()); err != nil {
+			return nil
+		}
 	}
-	return &ret
-}
-
-// DIHashPoseidon generates DI hash with Poseidon hash
-func DIHashPoseidon(input ...*fr.Element) *big.Int {
-	ret := new(big.Int)
-	temp := poseidon.Poseidon(input...)
-	temp.ToBigIntRegular(ret)
-	ret.Add(ret, Min1024)
-	return ret
-}
-
-// PoseidonAndDIHash returns the Poseidon Hash result together with DI hash result
-func PoseidonAndDIHash(input ...*fr.Element) (*fr.Element, *big.Int) {
-	ret := new(big.Int)
-	temp := poseidon.Poseidon(input...)
-	temp.ToBigIntRegular(ret)
-	ret.Add(ret, Min1024)
-	return temp, ret
+	var hramInt big.Int
+	hramBin := hFunc.Sum(nil)
+	hramInt.SetBytes(hramBin)
+	return &hramInt
 }
