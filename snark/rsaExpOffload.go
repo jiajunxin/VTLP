@@ -23,10 +23,6 @@ import (
 const (
 	// BitLength is the bit length of the RSA modular N, BitLength should be less than LimbSize * LimbNum
 	BitLength = 2048
-	// LimbSize is how many bits we use in each field element
-	LimbSize = 250
-	// LimbNum is how many field elements we use to represents a number in Z_N
-	LimbNum = 9
 
 	// KeyPathPrefix denotes the path to store the circuit and keys. fileName = KeyPathPrefix + "_" + _original
 	KeyPathPrefix = "RSAExpOffload"
@@ -36,7 +32,7 @@ const (
 type ExpCircuitInputs struct {
 	ChallengeL big.Int
 	RemainderR big.Int
-	Squares    []big.Int
+	SquaresMod []big.Int
 	Exponent   big.Int
 }
 
@@ -44,25 +40,56 @@ type ExpCircuitInputs struct {
 type ExpCircuitPublicInputs struct {
 	ChallengeL big.Int
 	RemainderR big.Int
-	Squares    []big.Int
+	SquaresMod []big.Int
+}
+
+func GetSquares(base, mod *big.Int) []big.Int {
+	big2 := new(big.Int).SetInt64(2)
+	ret := make([]big.Int, BitLength)
+	ret[0].Set(base)
+	for i := 1; i < BitLength; i++ {
+		ret[i].Exp(&ret[i-1], big2, mod)
+	}
+	return ret
+}
+
+func GetProd(base, exp, mod *big.Int) *big.Int {
+	var prod big.Int
+	big2 := new(big.Int).SetInt64(2)
+	squares := make([]big.Int, mod.BitLen())
+	squares[0].Set(base)
+	for i := 1; i < mod.BitLen(); i++ {
+		squares[i].Exp(&squares[i-1], big2, mod)
+	}
+
+	bitLen := exp.BitLen()
+	prod.SetInt64(1)
+	for i := 0; i < bitLen; i++ {
+		if exp.Bit(i) == 1 {
+			prod.Mul(&prod, &squares[i])
+		}
+	}
+	return &prod
 }
 
 // GenTestSet generates a set of values for test purpose.
-func GenTestSet(exponent *big.Int, setup *protocol.Setup) *ExpCircuitInputs {
+func GenVLTPTestSet(exponent *big.Int, setup *protocol.Setup) *ExpCircuitInputs {
 	var ret ExpCircuitInputs
 	rsaExp := protocol.RSAExpSetup()
-	ret.Squares = protocol.GetSquares(rsaExp.Base, rsaExp.RSAMod)
+	tempSlice := GetSquares(rsaExp.Base, rsaExp.RSAMod)
 	if exponent == nil {
-		ret.Exponent = *rsaExp.Exponent
+		ret.Exponent.Set(rsaExp.Exponent) //set it to a random number for test
 	}
-
-	// Compute an
-	prod := protocol.GetProd(rsaExp.Base, rsaExp.Exponent, rsaExp.RSAMod)
+	prod := GetProd(rsaExp.Base, rsaExp.Exponent, rsaExp.RSAMod)
 	var acc, remainder big.Int
 	acc.Exp(setup.G, prod, setup.N)
 	// We should generate a commitment of x here and input into as part of the transcript. However, this version of gnark does not support CP-SNARK.
 	transcript := fiatshamir.InitTranscript([]string{rsaExp.Base.String(), rsaExp.RSAMod.String(), setup.G.String(), setup.N.String(), acc.String()}, fiatshamir.Max252)
 	ret.ChallengeL.Set(transcript.GetPrimeChallengeUsingTranscript())
+	ret.SquaresMod = make([]big.Int, BitLength)
+	for i := 0; i < BitLength; i++ {
+		ret.SquaresMod[i].Mod(&tempSlice[i], &ret.ChallengeL)
+	}
 	remainder.Mod(prod, &ret.ChallengeL)
 	ret.RemainderR.Set(&remainder)
 	return &ret
@@ -73,8 +100,9 @@ func (input *ExpCircuitInputs) PublicPart() *ExpCircuitPublicInputs {
 	var ret ExpCircuitPublicInputs
 	ret.ChallengeL = input.ChallengeL
 	ret.RemainderR = input.RemainderR
+	ret.SquaresMod = make([]big.Int, BitLength)
 	for i := 0; i < BitLength; i++ {
-		ret.Squares = input.Squares
+		ret.SquaresMod = input.SquaresMod
 	}
 	return &ret
 }
@@ -100,7 +128,7 @@ func TestRSAOffload() {
 	} else {
 		fmt.Println("Circuit have already been compiled for test purpose.")
 	}
-	testSet := GenTestSet(nil, protocol.TrustedSetup())
+	testSet := GenVLTPTestSet(nil, protocol.TrustedSetup())
 	publicInfo := testSet.PublicPart()
 	proof, err := Prove(testSet)
 	if err != nil {

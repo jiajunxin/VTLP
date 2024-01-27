@@ -24,7 +24,7 @@ func RSAExpSetup() *RSAExpProof {
 	// ret.Q = *getSafePrime()
 	ret.P = new(big.Int)
 	ret.Q = new(big.Int)
-	ret.P.SetString(PString, 10)
+	ret.P.SetString(Pstring, 10)
 	ret.Q.SetString(Qstring, 10)
 	ret.RSAMod = new(big.Int).Mul(ret.P, ret.Q)
 	fmt.Println("Bit length of RSAMod = ", ret.RSAMod.BitLen())
@@ -36,44 +36,20 @@ func RSAExpSetup() *RSAExpProof {
 	ret.Order = new(big.Int).Mul(&ptemp, &qtemp)
 	ret.Base = getRanQR(ret.P, ret.Q)
 
-	var temp, big4 big.Int
+	var temp, big4, useless big.Int
 	big4.SetInt64(4)
 	ret.D = new(big.Int).SetInt64(publicKey)
 	ret.E = new(big.Int)
-	temp.GCD(ret.D, new(big.Int).Mul(ret.Order, &big4), ret.E, nil)
+	temp.GCD(&useless, ret.E, new(big.Int).Mul(ret.Order, &big4), ret.D)
 	if temp.Cmp(new(big.Int).SetInt64(1)) != 0 {
 		fmt.Println("Error while setting up keys!")
+		fmt.Println("order = ", new(big.Int).Mul(ret.Order, &big4).String())
+		fmt.Println("gcd = ", temp.String())
+		fmt.Println("d = ", ret.D.String())
+		fmt.Println("e = ", ret.E.String())
 	}
 
 	temp.SetInt64(TimePara)
 	ret.Exponent = new(big.Int).Exp(big2, &temp, ret.Order)
 	return &ret
-}
-
-func GetSquares(base, mod *big.Int) []big.Int {
-	ret := make([]big.Int, RSABitLength)
-	ret[0].Set(base)
-	for i := 1; i < mod.BitLen(); i++ {
-		ret[i].Exp(&ret[i-1], big2, mod)
-	}
-	return ret
-}
-
-func GetProd(base, exp, mod *big.Int) *big.Int {
-	var prod big.Int
-
-	squares := make([]big.Int, mod.BitLen())
-	squares[0].Set(base)
-	for i := 1; i < mod.BitLen(); i++ {
-		squares[i].Exp(&squares[i-1], big2, mod)
-	}
-
-	bitLen := exp.BitLen()
-	prod.Set(big1)
-	for i := 0; i < bitLen; i++ {
-		if exp.Bit(i) == 1 {
-			prod.Mul(&prod, &squares[i])
-		}
-	}
-	return &prod
 }

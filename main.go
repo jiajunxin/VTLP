@@ -9,7 +9,8 @@ import (
 
 func main() {
 	//protocol.ManualBench(1000000)
-
+	//protocol.RSAExpSetup()
+	//_ = snark.GenVLTPTestSet(nil, protocol.TrustedSetup())
 	snark.TestRSAOffload()
 	runtime.GC()
 
