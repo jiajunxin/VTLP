@@ -124,19 +124,18 @@ func TestRSAOffload() {
 		SetupZkMultiswap()
 		duration := time.Now().UTC().Sub(startingTime)
 		fmt.Printf("Generating a SNARK circuit for RSAExpOffload, takes [%.3f] Seconds \n", duration.Seconds())
-		runtime.GC()
 	} else {
 		fmt.Println("Circuit have already been compiled for test purpose.")
 	}
 	testSet := GenVLTPTestSet(nil, protocol.TrustedSetup())
 	publicInfo := testSet.PublicPart()
+	runtime.GC()
 	proof, err := Prove(testSet)
 	if err != nil {
 		fmt.Println("Error during Prove")
 		panic(err)
 	}
 	runtime.GC()
-
 	flag := Verify(proof, publicInfo)
 	if flag {
 		fmt.Println("Verification passed")
