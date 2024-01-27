@@ -25,8 +25,9 @@ const (
 	BitLength = 1024
 
 	// KeyPathPrefix denotes the path to store the circuit and keys. fileName = KeyPathPrefix + "_" + _original
-	KeyPathPrefix    = "RSAExpOffload"
-	OffloadSigPrefix = "OffloadSig"
+	KeyPathPrefix      = "RSAExpOffload"
+	OffloadSigPrefix   = "OffloadSig"
+	OffloadZKSigPrefix = "OffloadZKSig"
 )
 
 // ExpCircuitInputs is the inputs for the circuit VLTPCircuit

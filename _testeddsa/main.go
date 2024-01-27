@@ -16,7 +16,7 @@ import (
 //"github.com/PoMoDE/snark"
 //"github.com/PoMoDE/protocol"
 
-const size = 100
+const size = 1000
 
 // GetAssign generate a test assignment of circuit for Testing!
 func GetAssign() *eddsaCircuit {
@@ -113,6 +113,10 @@ func main() {
 	publicWitness, err := witness.Public()
 	// generate the proof
 	proof, err := groth16.Prove(ccs, pk, witness)
+	proof, err = groth16.Prove(ccs, pk, witness)
+	proof, err = groth16.Prove(ccs, pk, witness)
+	proof, err = groth16.Prove(ccs, pk, witness)
+	proof, err = groth16.Prove(ccs, pk, witness)
 	// verify the proof
 	err = groth16.Verify(proof, vk, publicWitness)
 	if err != nil {
@@ -132,6 +136,10 @@ func main() {
 	publicWitness2, err := witness2.Public()
 	// generate the proof
 	proof2, err := groth16.Prove(ccs2, pk2, witness2)
+	proof2, err = groth16.Prove(ccs2, pk2, witness2)
+	proof2, err = groth16.Prove(ccs2, pk2, witness2)
+	proof2, err = groth16.Prove(ccs2, pk2, witness2)
+	proof2, err = groth16.Prove(ccs2, pk2, witness2)
 
 	// verify the proof
 	err = groth16.Verify(proof2, vk2, publicWitness2)
