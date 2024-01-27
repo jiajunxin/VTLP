@@ -25,7 +25,8 @@ const (
 	BitLength = 1024
 
 	// KeyPathPrefix denotes the path to store the circuit and keys. fileName = KeyPathPrefix + "_" + _original
-	KeyPathPrefix = "RSAExpOffload"
+	KeyPathPrefix    = "RSAExpOffload"
+	OffloadSigPrefix = "OffloadSig"
 )
 
 // ExpCircuitInputs is the inputs for the circuit VLTPCircuit
@@ -121,7 +122,7 @@ func TestRSAOffload() {
 	if !isCircuitExist() {
 		fmt.Println("Circuit haven't been compiled for RSAExpOffload. Start compiling.")
 		startingTime := time.Now().UTC()
-		SetupZkMultiswap()
+		SetupVTLP()
 		duration := time.Now().UTC().Sub(startingTime)
 		fmt.Printf("Generating a SNARK circuit for RSAExpOffload, takes [%.3f] Seconds \n", duration.Seconds())
 	} else {
@@ -159,9 +160,8 @@ func LoadVerifyingKey(filepath string) (verifyingKey groth16.VerifyingKey, err e
 	return verifyingKey, nil
 }
 
-// SetupZkMultiswap generates the circuit and public/verification keys with Groth16
-// "keyPathPrefix".pk* are for public keys, "keyPathPrefix".ccs* are for r1cs, "keyPathPrefix".vk,save is for verification keys
-func SetupZkMultiswap() {
+// SetupVTLP generates the circuit and public/verification keys with Groth16
+func SetupVTLP() {
 	// compiles our circuit into a R1CS
 	circuit := InitCircuit()
 	fmt.Println("Start Compiling")
@@ -180,7 +180,7 @@ func SetupZkMultiswap() {
 	fmt.Println("Finish Setup")
 }
 
-// Prove is used to generate a Groth16 proof and public witness for the zkMultiSwap
+// Prove is used to generate a Groth16 proof and public witness for the VTLP
 func Prove(input *ExpCircuitInputs) (*groth16.Proof, error) {
 	fmt.Println("Start Proving")
 	fileName := KeyPathPrefix + "_original"
@@ -216,7 +216,7 @@ func Prove(input *ExpCircuitInputs) (*groth16.Proof, error) {
 	return &proof, nil
 }
 
-// VerifyPublicWitness returns true is the public witness is valid for zkMultiSwap
+// VerifyPublicWitness returns true is the public witness
 func VerifyPublicWitness(publicWitness *witness.Witness, publicInfo *ExpCircuitPublicInputs) bool {
 	startingTime := time.Now().UTC()
 	assignment2 := AssignCircuitHelper(publicInfo)
@@ -247,7 +247,7 @@ func GenPublicWitness(publicInfo *ExpCircuitPublicInputs) *witness.Witness {
 	return publicWitness
 }
 
-// Verify is used to check a Groth16 proof and public inputs for the zkMultiSwap
+// Verify is used to check a Groth16 proof and public inputs
 func Verify(proof *groth16.Proof, publicInfo *ExpCircuitPublicInputs) bool {
 	fileName := KeyPathPrefix + "_original"
 	vk, err := LoadVerifyingKey(fileName)

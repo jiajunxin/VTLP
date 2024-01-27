@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const expBenchmark int64 = 17
+const expBenchmark int64 = 8
 
 func BenchmarkZKPoMoDEProve(b *testing.B) {
 	setup := TrustedSetup()
