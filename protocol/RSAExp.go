@@ -27,7 +27,6 @@ func RSAExpSetup() *RSAExpProof {
 	ret.P.SetString(Pstring, 10)
 	ret.Q.SetString(Qstring, 10)
 	ret.RSAMod = new(big.Int).Mul(ret.P, ret.Q)
-	fmt.Println("Bit length of RSAMod = ", ret.RSAMod.BitLen())
 	var ptemp, qtemp big.Int
 	ptemp.Sub(ret.P, big1)
 	ptemp.Div(&ptemp, big2)
@@ -43,12 +42,13 @@ func RSAExpSetup() *RSAExpProof {
 	temp.GCD(&useless, ret.E, new(big.Int).Mul(ret.Order, &big4), ret.D)
 	if temp.Cmp(new(big.Int).SetInt64(1)) != 0 {
 		fmt.Println("Error while setting up keys!")
-		fmt.Println("order = ", new(big.Int).Mul(ret.Order, &big4).String())
-		fmt.Println("gcd = ", temp.String())
-		fmt.Println("d = ", ret.D.String())
 		fmt.Println("e = ", ret.E.String())
+		ret.E.Mod(ret.E, new(big.Int).Mul(ret.Order, &big4))
+		fmt.Println("e = ", ret.E.String())
+		temp.Mul(ret.D, ret.E)
+		temp.Mod(&temp, new(big.Int).Mul(ret.Order, &big4))
+		fmt.Println("temp = ", temp.String())
 	}
-
 	temp.SetInt64(TimePara)
 	ret.Exponent = new(big.Int).Exp(big2, &temp, ret.Order)
 	return &ret

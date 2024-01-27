@@ -22,7 +22,7 @@ import (
 
 const (
 	// BitLength is the bit length of the RSA modular N, BitLength should be less than LimbSize * LimbNum
-	BitLength = 2048
+	BitLength = 1024
 
 	// KeyPathPrefix denotes the path to store the circuit and keys. fileName = KeyPathPrefix + "_" + _original
 	KeyPathPrefix = "RSAExpOffload"
@@ -108,7 +108,7 @@ func (input *ExpCircuitInputs) PublicPart() *ExpCircuitPublicInputs {
 }
 
 func isCircuitExist() bool {
-	fileName := KeyPathPrefix + "_original"
+	fileName := KeyPathPrefix + "_original.vk.save"
 	_, err := os.Stat(fileName)
 	if err == nil {
 		return true
