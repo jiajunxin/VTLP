@@ -6,7 +6,7 @@ import (
 )
 
 const SetSize = 1000
-const RanSetSize = 256
+const RanSetSize = 2048
 
 type SigCircuit struct {
 	// struct tag on a variable is optional
