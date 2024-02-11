@@ -14,6 +14,14 @@ type ZKPoMoDEProof struct {
 	pi3 *ZKPoKEModProof
 }
 
+func (proof *ZKPoMoDEProof) isEmpty() bool {
+	if proof.D == nil || proof.C2 == nil || proof.pi1 == nil || proof.pi2 == nil || proof.pi3 == nil ||
+		proof.pi1.isEmpty() || proof.pi2.isEmpty() || proof.pi3.isEmpty() {
+		return true
+	}
+	return false
+}
+
 func ZKPoMoDEProve(pp *PublicParameters, C, n, e, xmod, x *big.Int) (*ZKPoMoDEProof, error) {
 	var ret ZKPoMoDEProof
 	length := 2048 + 256
@@ -54,7 +62,7 @@ func ZKPoMoDEProve(pp *PublicParameters, C, n, e, xmod, x *big.Int) (*ZKPoMoDEPr
 }
 
 func ZKPoMoDEVerify(pp *PublicParameters, C, n, e, xmod *big.Int, proof *ZKPoMoDEProof) bool {
-	if proof == nil || proof.pi1 == nil || proof.pi2 == nil || proof.pi3 == nil {
+	if proof == nil || proof.isEmpty() {
 		return false
 	}
 	if PoKEStarVerify(pp, proof.D, proof.pi1) == false {
@@ -81,6 +89,13 @@ type ZKPoMoDEFastProof struct {
 	pi2 *ZKPoKEModProof
 }
 
+func (proof *ZKPoMoDEFastProof) isEmpty() bool {
+	if proof.pi1 == nil || proof.pi1.isEmpty() || proof.pi2 == nil || proof.pi2.isEmpty() {
+		return true
+	}
+	return false
+}
+
 func ZKPoMoDEFastProve(pp *PublicParameters, C1, C2, n, e, xmod, x *big.Int) (*ZKPoMoDEFastProof, error) {
 	var ret ZKPoMoDEFastProof
 	tempProof1, err := ZKPoKDEProve(pp, C1, C2, x, e)
@@ -98,7 +113,7 @@ func ZKPoMoDEFastProve(pp *PublicParameters, C1, C2, n, e, xmod, x *big.Int) (*Z
 }
 
 func ZKPoMoDEFastVerify(pp *PublicParameters, C1, C2, n, e, xmod *big.Int, proof *ZKPoMoDEFastProof) bool {
-	if proof == nil || proof.pi1 == nil || proof.pi2 == nil {
+	if proof == nil || proof.isEmpty() {
 		return false
 	}
 	if ZKPoKDEVerify(pp, C1, C2, e, proof.pi1) == false {

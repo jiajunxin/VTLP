@@ -3,6 +3,7 @@ package main
 import (
 	crand "crypto/rand"
 	"fmt"
+	"runtime"
 
 	tedwards "github.com/consensys/gnark-crypto/ecc/twistededwards"
 	"github.com/consensys/gnark-crypto/hash"
@@ -16,7 +17,7 @@ import (
 //"github.com/PoMoDE/snark"
 //"github.com/PoMoDE/protocol"
 
-const size = 1000
+const size = 400
 
 // GetAssign generate a test assignment of circuit for Testing!
 func GetAssign() *eddsaCircuit {
@@ -101,7 +102,7 @@ func GetEmptyMiMcAssign() *MiMcCircuit {
 	return &assignment
 }
 
-func main() {
+func test1() {
 	snarkField, _ := twistededwards.GetSnarkField(tedwards.BN254)
 
 	fmt.Println("Testing ", size, " MiMc hash checks using Groth16")
@@ -122,7 +123,12 @@ func main() {
 	if err != nil {
 		fmt.Println("Error = ", err)
 	}
+}
 
+func main() {
+	snarkField, _ := twistededwards.GetSnarkField(tedwards.BN254)
+	//test1()
+	runtime.GC()
 	fmt.Println("Testing ", size, " MiMc hash&EdDSA checks using Groth16")
 	//fmt.Println("snarkField = ", snarkField.String())
 	ccs2, _ := frontend.Compile(snarkField, r1cs.NewBuilder, GetEmptyAssign())
@@ -135,6 +141,7 @@ func main() {
 	}
 	publicWitness2, err := witness2.Public()
 	// generate the proof
+	runtime.GC()
 	proof2, err := groth16.Prove(ccs2, pk2, witness2)
 	proof2, err = groth16.Prove(ccs2, pk2, witness2)
 	proof2, err = groth16.Prove(ccs2, pk2, witness2)

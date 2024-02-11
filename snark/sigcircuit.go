@@ -5,8 +5,8 @@ import (
 	"github.com/consensys/gnark/std/hash/mimc"
 )
 
-const SetSize = 1000
-const RanSetSize = 256
+const SetSize = 400
+const RanSetSize = 2048
 
 type SigCircuit struct {
 	// struct tag on a variable is optional
