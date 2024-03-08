@@ -28,8 +28,18 @@ type PoKEStarProof struct {
 	R *big.Int
 }
 
+func (proof *PoKEStarProof) isEmpty() bool {
+	if proof.Q == nil || proof.R == nil {
+		return true
+	}
+	return false
+}
+
 // PoKEStarProve proves knowledge of x s.t.  g^x = C
 func PoKEStarProve(pp *PublicParameters, C, x *big.Int) (*PoKEStarProof, error) {
+	if x == nil || pp == nil {
+		return nil, errors.New("PoKEStarProof input is nil")
+	}
 	var ret PoKEStarProof
 	ret.Q = new(big.Int)
 	ret.R = new(big.Int)
@@ -48,7 +58,7 @@ func PoKEStarProve(pp *PublicParameters, C, x *big.Int) (*PoKEStarProof, error) 
 
 // PoKEStarVerify checks the proof, returns true if everything is good
 func PoKEStarVerify(pp *PublicParameters, C *big.Int, proof *PoKEStarProof) bool {
-	if proof == nil {
+	if proof == nil || proof.isEmpty() {
 		return false
 	}
 	var temp, l big.Int
@@ -68,6 +78,14 @@ type ZKPoKEProof struct {
 	Qu   *big.Int
 	rx   *big.Int
 	rrho *big.Int
+}
+
+func (proof *ZKPoKEProof) isEmpty() bool {
+	if proof.z == nil || proof.Ag == nil || proof.Au == nil || proof.Qg == nil ||
+		proof.Qu == nil || proof.rx == nil || proof.rrho == nil {
+		return true
+	}
+	return false
 }
 
 // ZKPoKEProve proves in zero-knowledge of knowledge x s.t. u^x =w mod N
@@ -124,7 +142,7 @@ func ZKPoKEProve(pp *PublicParameters, u, x, w *big.Int) (*ZKPoKEProof, error) {
 
 // ZKPoKEVerify checks the proof, returns true if everything is good
 func ZKPoKEVerify(pp *PublicParameters, u, w *big.Int, proof *ZKPoKEProof) bool {
-	if proof == nil {
+	if proof == nil || proof.isEmpty() {
 		return false
 	}
 	var c, l big.Int
@@ -157,6 +175,13 @@ type PoEProof struct {
 	Q *big.Int
 }
 
+func (proof *PoEProof) isEmpty() bool {
+	if proof.Q == nil {
+		return true
+	}
+	return false
+}
+
 // PoEProve proves g^x = C
 func PoEProve(base, mod, C, x *big.Int) (*PoEProof, error) {
 	var ret PoEProof
@@ -176,7 +201,7 @@ func PoEProve(base, mod, C, x *big.Int) (*PoEProof, error) {
 
 // PoEVerify checks the proof, returns true if everything is good
 func PoEVerify(base, mod, C, x *big.Int, proof *PoEProof) bool {
-	if proof == nil {
+	if proof == nil || proof.isEmpty() {
 		return false
 	}
 	var temp, l, r big.Int

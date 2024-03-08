@@ -16,6 +16,13 @@ type ZKPoKEModProof struct {
 	r  *big.Int
 }
 
+func (proof *ZKPoKEModProof) isEmpty() bool {
+	if proof.D == nil || proof.Q == nil || proof.r == nil || proof.pi == nil || proof.pi.isEmpty() {
+		return true
+	}
+	return false
+}
+
 func ZKPoKEModProve(pp *PublicParameters, C, x, n, xmod *big.Int) (*ZKPoKEModProof, error) {
 	// input checks
 	var temp big.Int
@@ -60,7 +67,7 @@ func ZKPoKEModProve(pp *PublicParameters, C, x, n, xmod *big.Int) (*ZKPoKEModPro
 }
 
 func ZKPoKEModVerify(pp *PublicParameters, C, n, xmod *big.Int, proof *ZKPoKEModProof) bool {
-	if proof == nil || proof.pi == nil {
+	if proof == nil || proof.isEmpty() {
 		return false
 	}
 	flag := PoKEStarVerify(pp, proof.D, proof.pi)

@@ -15,6 +15,13 @@ type PoKDEProof struct {
 	r2 *big.Int
 }
 
+func (proof *PoKDEProof) isEmpty() bool {
+	if proof.Q1 == nil || proof.r1 == nil || proof.Q2 == nil || proof.r2 == nil {
+		return true
+	}
+	return false
+}
+
 // PoKDEProve prove C1=g^x, C2=g^{x^e}
 func PoKDEProve(pp *PublicParameters, C1, C2, x, e *big.Int) (*PoKDEProof, error) {
 	var xe, l, q1, q2, r1, r2 big.Int
@@ -34,7 +41,7 @@ func PoKDEProve(pp *PublicParameters, C1, C2, x, e *big.Int) (*PoKDEProof, error
 
 // PoKDEVerify checks the proof, returns true if everything is good
 func PoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *PoKDEProof) bool {
-	if proof == nil || proof.Q1 == nil || proof.Q2 == nil || proof.r1 == nil || proof.r2 == nil {
+	if proof.isEmpty() {
 		return false
 	}
 	var l, temp big.Int
@@ -61,6 +68,15 @@ type ZKPoKDEProof struct {
 	pi2 *PoEProof
 	pi3 *ZKPoKEProof
 	pi4 *PoKDEProof
+}
+
+func (proof *ZKPoKDEProof) isEmpty() bool {
+	if proof.D == nil || proof.E == nil || proof.F == nil || proof.K == nil || proof.pi1 == nil ||
+		proof.pi2 == nil || proof.pi3 == nil || proof.pi4 == nil || proof.pi1.isEmpty() ||
+		proof.pi2.isEmpty() || proof.pi3.isEmpty() || proof.pi4.isEmpty() {
+		return true
+	}
+	return false
 }
 
 // ZKPoKDEProve prove C1=g^x, C2=g^{x^e} in zero-knowledge
@@ -125,7 +141,7 @@ func ZKPoKDEProve(pp *PublicParameters, C1, C2, x, e *big.Int) (*ZKPoKDEProof, e
 
 // ZKPoKDEVerify checks C1=g^x, C2=g^{x^e}, returns true is everything is correct
 func ZKPoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *ZKPoKDEProof) bool {
-	if pp == nil || proof == nil || proof.pi1 == nil || proof.pi2 == nil || proof.pi3 == nil || proof.pi4 == nil {
+	if pp == nil || proof.isEmpty() {
 		return false
 	}
 
