@@ -64,7 +64,7 @@ func ZKPoKEModVerify(pp *PublicParameters, C, n, xmod *big.Int, proof *ZKPoKEMod
 		return false
 	}
 	flag := PoKEStarVerify(pp, proof.D, proof.pi)
-	if flag != true {
+	if !flag {
 		return false
 	}
 	var l big.Int
@@ -85,8 +85,5 @@ func ZKPoKEModVerify(pp *PublicParameters, C, n, xmod *big.Int, proof *ZKPoKEMod
 		return false
 	}
 	temp.Mod(proof.r, n)
-	if temp.Cmp(xmod) != 0 {
-		return false
-	}
-	return true
+	return temp.Cmp(xmod) == 0
 }

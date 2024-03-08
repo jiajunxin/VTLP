@@ -57,7 +57,7 @@ func ZKPoMoDEVerify(pp *PublicParameters, C, n, e, xmod *big.Int, proof *ZKPoMoD
 	if proof == nil || proof.pi1 == nil || proof.pi2 == nil || proof.pi3 == nil {
 		return false
 	}
-	if PoKEStarVerify(pp, proof.D, proof.pi1) == false {
+	if !PoKEStarVerify(pp, proof.D, proof.pi1) {
 		return false
 	}
 	// temp = C*D^n
@@ -65,11 +65,11 @@ func ZKPoMoDEVerify(pp *PublicParameters, C, n, e, xmod *big.Int, proof *ZKPoMoD
 	temp.Exp(proof.D, n, pp.N)
 	temp.Mul(&temp, C)
 	temp.Mod(&temp, pp.N)
-	if ZKPoKDEVerify(pp, &temp, proof.C2, e, proof.pi2) == false {
+	if !ZKPoKDEVerify(pp, &temp, proof.C2, e, proof.pi2) {
 		return false
 	}
 
-	if ZKPoKEModVerify(pp, proof.C2, n, xmod, proof.pi3) == false {
+	if !ZKPoKEModVerify(pp, proof.C2, n, xmod, proof.pi3) {
 		return false
 	}
 	return true
@@ -101,10 +101,10 @@ func ZKPoMoDEFastVerify(pp *PublicParameters, C1, C2, n, e, xmod *big.Int, proof
 	if proof == nil || proof.pi1 == nil || proof.pi2 == nil {
 		return false
 	}
-	if ZKPoKDEVerify(pp, C1, C2, e, proof.pi1) == false {
+	if !ZKPoKDEVerify(pp, C1, C2, e, proof.pi1) {
 		return false
 	}
-	if ZKPoKEModVerify(pp, C2, n, xmod, proof.pi2) == false {
+	if !ZKPoKEModVerify(pp, C2, n, xmod, proof.pi2) {
 		return false
 	}
 	return true

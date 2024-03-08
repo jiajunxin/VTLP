@@ -85,6 +85,22 @@ type Setup struct {
 	H *big.Int //another generator in Z*_N
 }
 
+// PublicParameters holds public parameters initialized during the setup procedure
+type PublicParameters struct {
+	N *big.Int
+	G *big.Int
+	H *big.Int
+}
+
+// NewPublicParameters generates a new public parameter configuration
+func NewPublicParameters(n, g, h *big.Int) *PublicParameters {
+	return &PublicParameters{
+		N: n,
+		G: g,
+		H: h,
+	}
+}
+
 // Element should be able to be accumulated into RSA accumulator
 type Element []byte
 

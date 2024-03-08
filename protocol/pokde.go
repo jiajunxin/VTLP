@@ -48,10 +48,7 @@ func PoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *PoKDEProof) bo
 		return false
 	}
 	temp.Set(MultiExp(proof.Q2, &l, pp.G, proof.r2, pp.N))
-	if temp.Cmp(C2) != 0 {
-		return false
-	}
-	return true
+	return temp.Cmp(C2) == 0
 }
 
 // ZKPoKDEProof contains the proofs for PoKDE
@@ -132,7 +129,7 @@ func ZKPoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *ZKPoKDEProof
 		return false
 	}
 
-	if PoKEStarVerify(pp, proof.D, proof.pi1) != true {
+	if !PoKEStarVerify(pp, proof.D, proof.pi1) {
 		return false
 	}
 	var l, gamma, temp big.Int
@@ -148,22 +145,18 @@ func ZKPoKDEVerify(pp *PublicParameters, C1, C2, e *big.Int, proof *ZKPoKDEProof
 	}
 
 	temp.Exp(&l, e, nil)
-	if PoEVerify(C2, pp.N, proof.K, &temp, proof.pi2) != true {
+	if !PoEVerify(C2, pp.N, proof.K, &temp, proof.pi2) {
 		return false
 	}
 	//temp = D * g^gamma
 	temp.Exp(pp.G, &gamma, pp.N)
 	temp.Mul(&temp, proof.D)
 	temp.Mod(&temp, pp.N)
-	if ZKPoKEVerify(pp, &temp, proof.F, proof.pi3) != true {
+	if !ZKPoKEVerify(pp, &temp, proof.F, proof.pi3) {
 		return false
 	}
 	//temp = C1^l * D * g^gamma
 	temp.Mul(&temp, new(big.Int).Exp(C1, &l, pp.N))
 	temp.Mod(&temp, pp.N)
-	if PoKDEVerify(pp, &temp, proof.E, e, proof.pi4) != true {
-		return false
-	}
-
-	return true
+	return PoKDEVerify(pp, &temp, proof.E, e, proof.pi4)
 }

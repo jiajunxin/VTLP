@@ -21,7 +21,7 @@ func TestPoKEStar(t *testing.T) {
 	}
 
 	exponent.SetInt64(667)
-	proof, err = PoKEStarProve(&pp, &C, &exponent)
+	_, err = PoKEStarProve(&pp, &C, &exponent)
 	if err == nil {
 		t.Errorf("error empty when it should not for TestPoKEStar")
 	}
@@ -54,7 +54,7 @@ func TestZKPoKE(t *testing.T) {
 	}
 
 	exponent.SetInt64(667)
-	proof, err = ZKPoKEProve(&pp, pp.G, &exponent, &C)
+	_, err = ZKPoKEProve(&pp, pp.G, &exponent, &C)
 	if err == nil {
 		t.Errorf("error empty when it should not for TestPoKEStar")
 	}
@@ -89,7 +89,7 @@ func TestZKPoKEMod(t *testing.T) {
 	}
 
 	x.SetInt64(667)
-	proof, err = ZKPoKEModProve(&pp, &C, &x, &n, &xmod)
+	_, err = ZKPoKEModProve(&pp, &C, &x, &n, &xmod)
 	if err == nil {
 		t.Errorf("error empty when it should not for TestPoKEStar")
 	}

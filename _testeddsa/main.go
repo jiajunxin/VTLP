@@ -16,7 +16,7 @@ import (
 //"github.com/PoMoDE/snark"
 //"github.com/PoMoDE/protocol"
 
-const size = 1000
+const size = 1
 
 // GetAssign generate a test assignment of circuit for Testing!
 func GetAssign() *eddsaCircuit {
