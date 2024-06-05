@@ -118,8 +118,8 @@ func isCircuitExist() bool {
 	return !os.IsNotExist(err)
 }
 
-// TestRSAOffload is temporarily used for test purpose
-func TestRSAOffload() {
+// TestVTLP is temporarily used for benchmark purpose
+func TestVTLP() {
 	if !isCircuitExist() {
 		fmt.Println("Circuit haven't been compiled for RSAExpOffload. Start compiling.")
 		startingTime := time.Now().UTC()
