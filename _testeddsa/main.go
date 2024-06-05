@@ -102,7 +102,7 @@ func GetEmptyMiMcAssign() *MiMcCircuit {
 	return &assignment
 }
 
-func test1() {
+func testMiMcCircuit() {
 	snarkField, _ := twistededwards.GetSnarkField(tedwards.BN254)
 
 	fmt.Println("Testing ", size, " MiMc hash checks using Groth16")
@@ -125,10 +125,8 @@ func test1() {
 	}
 }
 
-func main() {
+func testEdDSACircuit() {
 	snarkField, _ := twistededwards.GetSnarkField(tedwards.BN254)
-	//test1()
-	runtime.GC()
 	fmt.Println("Testing ", size, " MiMc hash&EdDSA checks using Groth16")
 	//fmt.Println("snarkField = ", snarkField.String())
 	ccs2, _ := frontend.Compile(snarkField, r1cs.NewBuilder, GetEmptyAssign())
@@ -140,6 +138,9 @@ func main() {
 		fmt.Println("Error = ", err)
 	}
 	publicWitness2, err := witness2.Public()
+	if err != nil {
+		fmt.Println("Error = ", err)
+	}
 	// generate the proof
 	runtime.GC()
 	proof2, err := groth16.Prove(ccs2, pk2, witness2)
@@ -153,4 +154,10 @@ func main() {
 	if err != nil {
 		fmt.Println("Error = ", err)
 	}
+}
+
+func main() {
+	//testMiMcCircuit()
+	runtime.GC()
+	testEdDSACircuit()
 }

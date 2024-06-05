@@ -13,8 +13,6 @@ func main() {
 	protocol.RSAExpSetup()
 	snark.TestOffloadSig()
 	snark.TestOffloadZKSig()
-	snark.TestRSAOffload()
+	snark.TestVTLP()
 	runtime.GC()
-
-	return
 }
