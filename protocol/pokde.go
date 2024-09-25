@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"math/big"
 
-	fiatshamir "github.com/PoMoDE/fiat-shamir"
+	fiatshamir "github.com/VTLP/fiat-shamir"
 )
 
 // PoKDEProof contains the proofs for PoKDE

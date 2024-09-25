@@ -16,8 +16,8 @@ import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 
-	fiatshamir "github.com/PoMoDE/fiat-shamir"
-	"github.com/PoMoDE/protocol"
+	fiatshamir "github.com/VTLP/fiat-shamir"
+	"github.com/VTLP/protocol"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 	"errors"
 	"math/big"
 
-	fiatshamir "github.com/PoMoDE/fiat-shamir"
+	fiatshamir "github.com/VTLP/fiat-shamir"
 )
 
 // MultiExp computes g^x * h^r mod n

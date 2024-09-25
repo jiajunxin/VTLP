@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	fiatshamir "github.com/PoMoDE/fiat-shamir"
-	"github.com/PoMoDE/protocol"
+	fiatshamir "github.com/VTLP/fiat-shamir"
+	"github.com/VTLP/protocol"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/hash"
 	"github.com/consensys/gnark/backend"

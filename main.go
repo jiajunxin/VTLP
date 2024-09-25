@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	"github.com/PoMoDE/protocol"
-	"github.com/PoMoDE/snark"
+	"github.com/VTLP/protocol"
+	"github.com/VTLP/snark"
 )
 
 func main() {

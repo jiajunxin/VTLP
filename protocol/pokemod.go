@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math/big"
 
-	fiatshamir "github.com/PoMoDE/fiat-shamir"
+	fiatshamir "github.com/VTLP/fiat-shamir"
 )
 
 // ZKPoKEModProof contains the proofs for ZKPoKEMod
