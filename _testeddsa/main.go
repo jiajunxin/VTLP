@@ -9,15 +9,19 @@ import (
 	"github.com/consensys/gnark-crypto/hash"
 	"github.com/consensys/gnark-crypto/signature/eddsa"
 	"github.com/consensys/gnark/backend/groth16"
+	"github.com/consensys/gnark/backend/plonk"
+	cs "github.com/consensys/gnark/constraint/bn254"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
+	"github.com/consensys/gnark/frontend/cs/scs"
 	"github.com/consensys/gnark/std/algebra/native/twistededwards"
+	"github.com/consensys/gnark/test/unsafekzg"
 )
 
 //"github.com/PoMoDE/snark"
 //"github.com/PoMoDE/protocol"
 
-const size = 400
+const size = 1024
 
 // GetAssign generate a test assignment of circuit for Testing!
 func GetAssign() *eddsaCircuit {
@@ -156,8 +160,44 @@ func testEdDSACircuit() {
 	}
 }
 
+func testEdDSACircuitPlonk() {
+	snarkField, _ := twistededwards.GetSnarkField(tedwards.BN254)
+	fmt.Println("Testing ", size, " MiMc hash&EdDSA checks using Groth16")
+	//fmt.Println("snarkField = ", snarkField.String())
+	ccs2, _ := frontend.Compile(snarkField, scs.NewBuilder, GetEmptyAssign())
+	fmt.Println("GetNbInstructions = ", ccs2.GetNbInstructions())
+	fmt.Println("GetNbCoefficients = ", ccs2.GetNbCoefficients())
+	scs := ccs2.(*cs.SparseR1CS)
+	srs, srsLagrange, err := unsafekzg.NewSRS(scs)
+	pk2, vk2, err := plonk.Setup(ccs2, srs, srsLagrange)
+	// groth16 zkSNARK: Setup
+	//pk2, vk2, _ := groth16.Setup(ccs2)
+	witness2, err := frontend.NewWitness(GetAssign(), snarkField)
+	if err != nil {
+		fmt.Println("Error = ", err)
+	}
+	publicWitness2, err := witness2.Public()
+	if err != nil {
+		fmt.Println("Error = ", err)
+	}
+	// generate the proof
+	runtime.GC()
+	proof2, err := plonk.Prove(ccs2, pk2, witness2)
+	proof2, err = plonk.Prove(ccs2, pk2, witness2)
+	proof2, err = plonk.Prove(ccs2, pk2, witness2)
+	proof2, err = plonk.Prove(ccs2, pk2, witness2)
+	proof2, err = plonk.Prove(ccs2, pk2, witness2)
+
+	// verify the proof
+	err = plonk.Verify(proof2, vk2, publicWitness2)
+	if err != nil {
+		fmt.Println("Error = ", err)
+	}
+}
+
 func main() {
 	//testMiMcCircuit()
 	runtime.GC()
 	testEdDSACircuit()
+	testEdDSACircuitPlonk()
 }
